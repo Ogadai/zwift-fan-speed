@@ -1,0 +1,13 @@
+﻿# Include your project-specific ignores in this file
+# Read about how to use .gitignore: https://help.github.com/articles/ignoring-files
+
+/node_modules
+
+/bin/
+/log/
+npm-debug.*
+/obj/
+/.vs/
+zwift-fan-speed.njsproj
+zwift-fan-speed.sln
+settings.js

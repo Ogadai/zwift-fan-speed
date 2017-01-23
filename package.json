@@ -1,0 +1,17 @@
+{
+  "name": "zwift-data-lookup",
+  "version": "0.0.0",
+  "description": "ZwiftDataLookup",
+  "main": "app.js",
+  "author": {
+    "name": "alee"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "extend": "^3.0.0",
+    "https": "^1.0.0",
+    "onoff": "^1.1.1",
+    "protobufjs": "^6.5.1",
+    "zwift-mobile-api": "*"
+  }
+}
