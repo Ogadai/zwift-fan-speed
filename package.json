@@ -1,7 +1,7 @@
 {
-  "name": "zwift-data-lookup",
+  "name": "zwift-fan-speed",
   "version": "0.0.0",
-  "description": "ZwiftDataLookup",
+  "description": "Control fan speed based on rider speed in Zwift",
   "main": "app.js",
   "author": {
     "name": "alee"

@@ -34,6 +34,19 @@ app.get('/status/', function (req, res) {
     });
 })
 
+app.get('/json/', function (req, res) {
+    var path = req.query.path;
+    console.log(`Request: ${path}`);
+    account.getRequest().json(path)
+        .then(function (data) {
+            res.send(asHtml(data))
+        })
+        .catch(function (err) {
+            console.log(err.response);
+            res.status(err.response.status).send(`${err.response.status} - ${err.response.statusText}`);
+        });
+})
+
 app.get('/', function (req, res) {
     var playerId = req.query.player || settings.player;
     account.getProfile(playerId).profile().then(function (data) {

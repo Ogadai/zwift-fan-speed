@@ -1,66 +1,67 @@
 ﻿const Gpio = require('./gpio');
 const extend = require('extend');
 
-function FanSpeed(config) {
-    var self = this,
-        gpio,
-        currentState = 0,
-        settings = extend({
-            min: 10,
-            max: 50,
-            scale: 1,
-            pollInterval: 100
-        }, config);
+class FanSpeed {
+    constructor(config) {
+        this.currentState = 0;
 
-	if (Gpio) {
-		gpio = new Gpio(config.gpio.pin, 'out');
-		onTimeout(0);
+        this.settings = extend({
+                min: 10,
+                max: 50,
+                scale: 1,
+                pollInterval: 100
+            }, config);
 
-		this.disconnect = function () {
-			gpio.unexport();
-			gpio = null;
-		}
-	}
+        if (Gpio) {
+            this.onTimeout(0);
+            this.gpio = new Gpio(config.gpio.pin, 'out');
 
-	function getFanSpeed(speedKm) {
-        if (speedKm > settings.max) speedKm = settings.max;
-        if (speedKm < settings.min) speedKm = settings.min;
+            this.disconnect = function () {
+                this.gpio.unexport();
+                this.gpio = null;
+            }
+        }
+    }
 
-        let speed = Math.pow((speedKm - settings.min), settings.scale)
-            / Math.pow((settings.max - settings.min), settings.scale);
+	getFanSpeed(speedKm) {
+        if (speedKm > this.settings.max) speedKm = this.settings.max;
+        if (speedKm < this.settings.min) speedKm = this.settings.min;
+
+        let speed = Math.pow((speedKm - this.settings.min), this.settings.scale)
+            / Math.pow((this.settings.max - this.settings.min), this.settings.scale);
 
 		return speed;
 	}
 
-	function onTimeout(outVal) {
-		let nextTime = settings.pollInterval,
+	onTimeout(outVal) {
+        let nextTime = this.settings.pollInterval,
 			nextVal = outVal;
 
-		if (currentState === 0) {
+        if (this.currentState === 0) {
 			outVal = 0;
 			nextVal = 0;
 		}
-		else if (currentState === 1) {
+        else if (this.currentState === 1) {
 			outVal = 1;
 			nextVal = 1;
 		} else {
-            nextTime = settings.pollInterval * ((outVal === 0) ? 1 - currentState : currentState);
+            nextTime = this.settings.pollInterval * ((outVal === 0) ? 1 - this.currentState : this.currentState);
 			nextVal = 1 - outVal;
 		}
 
-		setTimeout(function () {
-			onTimeout(nextVal);
-		}, nextTime);
+		setTimeout(() => this.onTimeout(nextVal), nextTime);
 
-        if (gpio) {
-            gpio.writeSync(outVal);
+        if (this.gpio) {
+            this.gpio.writeSync(outVal);
+        } else {
+            process.stdout.write(outVal.toString());
         }
 	}
 
-	self.setState = function (state) {
-        currentState = getFanSpeed(state);
-        if (!gpio) {
-            console.log(`Fan speed ${currentState}`);
+	setState(state) {
+        this.currentState = this.getFanSpeed(state);
+        if (!this.gpio) {
+            console.log(`Fan speed ${this.currentState}`);
         }
 	}
 }

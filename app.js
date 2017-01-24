@@ -1,9 +1,11 @@
-﻿const ZwiftAccount = require('zwift-mobile-api')
-const FanSpeed = require('./devices/fan-speed');
-const settings = require('./settings');
-const server = require('./server');
+﻿const ZwiftAccount = require('zwift-mobile-api'),
+      FanSpeed = require('./devices/fan-speed'),
+      LED = require('./devices/led'),
+      settings = require('./settings'),
+      server = require('./server');
 
-const account = new ZwiftAccount(settings.username, settings.password);
+const account = new ZwiftAccount(settings.username, settings.password),
+      led = new LED(settings.led);
 
 let interval,
     playerProfile,
@@ -32,8 +34,11 @@ function startInterval(callbackFn, timeout) {
 }
 
 function checkPlayerStatus() {
+    led.setState('off');
     account.getProfile(settings.player).profile()
         .then(profile => {
+            led.setState('on');
+
             if (profile.riding) {
                 console.log(`Player ${settings.player} has started riding`);
                 startMonitorSpeed(profile);
@@ -42,13 +47,17 @@ function checkPlayerStatus() {
             }
         })
         .catch(err => {
+            led.setState('error');
             console.log(`Error getting player status: ${err.response.status} - ${err.response.statusText}`);
         });
 }
 
 function checkPlayerSpeed() {
+    led.setState('on');
     account.getWorld(playerProfile.worldId).riderStatus(settings.player)
         .then(status => {
+            led.setState('off');
+
             if (!status || status.speed === undefined) {
                 console.log('Invalid rider status');
                 speedCheckError();
@@ -67,6 +76,7 @@ function checkPlayerSpeed() {
 }
 
 function speedCheckError() {
+    led.setState('error');
     errorCount++;
     if (errorCount >= 3) {
         startWaitPlayer();
