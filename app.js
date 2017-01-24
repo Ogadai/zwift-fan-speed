@@ -1,8 +1,8 @@
 ﻿const ZwiftAccount = require('zwift-mobile-api'),
-      FanSpeed = require('./devices/fan-speed'),
-      LED = require('./devices/led'),
-      settings = require('./settings'),
-      server = require('./server');
+    FanSpeed = require('./devices/fan-speed'),
+    LED = require('./devices/led'),
+    settings = require('./settings'),
+    server = require('./server');
 
 const account = new ZwiftAccount(settings.username, settings.password),
       led = new LED(settings.led);
