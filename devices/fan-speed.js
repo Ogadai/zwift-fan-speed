@@ -15,11 +15,6 @@ class FanSpeed {
         if (Gpio) {
             this.onTimeout(0);
             this.gpio = new Gpio(config.gpio.pin, 'out');
-
-            this.disconnect = function () {
-                this.gpio.unexport();
-                this.gpio = null;
-            }
         }
     }
 
@@ -30,7 +25,7 @@ class FanSpeed {
         let speed = Math.pow((speedKm - this.settings.min), this.settings.scale)
             / Math.pow((this.settings.max - this.settings.min), this.settings.scale);
 
-		return speed;
+		return Math.round(speed * 100) / 100;
 	}
 
 	onTimeout(outVal) {
@@ -63,6 +58,14 @@ class FanSpeed {
         if (!this.gpio) {
             console.log(`Fan speed ${this.currentState}`);
         }
-	}
+        return this.currentState;
+    }
+
+    disconnect() {
+        if (!this.gpio) {
+            this.gpio.unexport();
+            this.gpio = null;
+        }
+    }
 }
 module.exports = FanSpeed;

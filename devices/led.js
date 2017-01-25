@@ -6,11 +6,6 @@ class LED {
 
         if (Gpio && config) {
             this.gpio = new Gpio(config.gpio.pin, 'out');
-
-            this.disconnect = function () {
-                this.gpio.unexport();
-                this.gpio = null;
-            }
         }
     }
 
@@ -41,6 +36,14 @@ class LED {
             ledOn = !ledOn;
             this.gpio.writeSync(ledOn ? 1 : 0);
         }, 250);
+    }
+
+    disconnect() {
+        clearError();
+        if (!this.gpio) {
+            this.gpio.unexport();
+            this.gpio = null;
+        }
     }
 }
 module.exports = LED;

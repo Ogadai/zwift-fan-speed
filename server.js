@@ -4,6 +4,7 @@ const ZwiftAccount = require('zwift-mobile-api')
 const settings = require('./settings');
 
 const account = new ZwiftAccount(settings.username, settings.password);
+let fanSpeed = null;
 
 //app.get('/followers/', function (req, res) {
 //    var playerId = req.query.player || settings.player;
@@ -47,6 +48,16 @@ app.get('/status/', function (req, res) {
 //        });
 //})
 
+app.get('/fan/:speed', function (req, res) {
+    let speed = req.params.speed,
+        result = 0;
+    if (fanSpeed) {
+        result = fanSpeed.setState(speed);
+    }
+
+    res.send(`Fan speed set to ${result}`);
+})
+
 app.get('/', function (req, res) {
     var playerId = req.query.player || settings.player;
     account.getProfile(playerId).profile().then(function (data) {
@@ -61,3 +72,11 @@ app.listen(3000, function () {
 function asHtml(data) {
     return '<html><body><pre><code>' + JSON.stringify(data, null, 4) + '</code></pre></body></html>'
 }
+
+function setFanSpeed(fan) {
+    fanSpeed = fan;
+}
+
+module.exports = {
+    setFanSpeed
+};

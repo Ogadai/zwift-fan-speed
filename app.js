@@ -9,9 +9,10 @@ const account = new ZwiftAccount(settings.username, settings.password),
 
 let interval,
     playerProfile,
-    fanSpeed,
+    fanSpeed = new FanSpeed(settings.fan),
     errorCount
 
+server.setFanSpeed(fanSpeed);
 startWaitPlayer();
 
 function startWaitPlayer() {
@@ -21,7 +22,6 @@ function startWaitPlayer() {
 function startMonitorSpeed(profile) {
     console.log('Start monitoring rider speed');
     playerProfile = profile
-    fanSpeed = new FanSpeed(settings.fan);
     errorCount = 0;
 
     startInterval(checkPlayerSpeed, settings.interval || 2000);
@@ -79,6 +79,7 @@ function speedCheckError() {
     led.setState('error');
     errorCount++;
     if (errorCount >= 3) {
+        fanSpeed.setState(0);
         startWaitPlayer();
     }
 }
