@@ -9,12 +9,17 @@ class FanSpeed {
                 min: 10,
                 max: 50,
                 scale: 1,
+		base: 0.2,
                 pollInterval: 100
             }, config);
 
         if (Gpio) {
-            this.onTimeout(0);
             this.gpio = new Gpio(config.gpio.pin, 'out');
+
+            this.gnd = new Gpio(config.gpio.gnd, 'out');
+            this.gnd.writeSync(0);
+
+            this.onTimeout(0);
         }
     }
 
@@ -24,6 +29,10 @@ class FanSpeed {
 
         let speed = Math.pow((speedKm - this.settings.min), this.settings.scale)
             / Math.pow((this.settings.max - this.settings.min), this.settings.scale);
+
+	    if (speed < this.settings.base) {
+		speed = speed < this.settings.base / 2 ? 0 : this.settings.base;
+	    }
 
 		return Math.round(speed * 100) / 100;
 	}
@@ -65,6 +74,8 @@ class FanSpeed {
         if (!this.gpio) {
             this.gpio.unexport();
             this.gpio = null;
+            this.gnd.unexport();
+            this.gnd = null;
         }
     }
 }
