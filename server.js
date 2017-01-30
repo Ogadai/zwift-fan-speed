@@ -71,7 +71,7 @@ app.get('/profile', function (req, res) {
   account.getProfile(playerId).profile().then(respondJson(res));
 })
 
-app.use(express.static('./../zwift-second-screen/public'))
+app.use(express.static('node_modules/zwift-second-screen/public'))
 
 app.listen(3000, function () {
   console.log(`Listening on port 3000!`)
