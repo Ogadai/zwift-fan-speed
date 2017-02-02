@@ -3,49 +3,13 @@ const bodyParser = require('body-parser');
 const app = express();
 const ZwiftAccount = require('zwift-mobile-api');
 const settings = require('./settings');
+const port = settings.port || 3000;
 
 const account = new ZwiftAccount(settings.username, settings.password);
 let fanSpeed = null;
 
 app.use(bodyParser.json());
 
-//app.get('/followers/', function (req, res) {
-//    var playerId = req.query.player || settings.player;
-//    account.getProfile(playerId).followers().then(function (data) {
-//        res.send(asHtml(data))
-//    });
-//})
-
-//app.get('/followees/', function (req, res) {
-//    var playerId = req.query.player || settings.player;
-//    account.getProfile(playerId).followees().then(function (data) {
-//        res.send(asHtml(data))
-//    });
-//})
-
-app.get('/riders/', function (req, res) {
-  var worldId = req.query.world || 1;
-  account.getWorld(worldId).riders().then(respondJson(res));
-})
-
-app.get('/status/', function (req, res) {
-  var worldId = req.query.world || 1;
-  var playerId = req.query.player || settings.player;
-  account.getWorld(worldId).riderStatus(playerId).then(respondJson(res));
-})
-
-//app.get('/json/', function (req, res) {
-//    var path = req.query.path;
-//    console.log(`Request: ${path}`);
-//    account.getRequest().json(path)
-//        .then(function (data) {
-//            res.send(asHtml(data))
-//        })
-//        .catch(function (err) {
-//            console.log(err.response);
-//            res.status(err.response.status).send(`${err.response.status} - ${err.response.statusText}`);
-//        });
-//})
 app.options('/fan', function (req, res) {
   sendJson(res);
 });
@@ -71,10 +35,10 @@ app.get('/profile', function (req, res) {
   account.getProfile(playerId).profile().then(respondJson(res));
 })
 
-app.use(express.static('node_modules/zwift-second-screen/public'))
+app.use(express.static('node_modules/zwift-fan-speed-ui/public'))
 
-app.listen(3000, function () {
-  console.log(`Listening on port 3000!`)
+app.listen(port, function () {
+  console.log(`Listening on port ${port}!`)
 })
 
 function respondJson(res) {
@@ -88,10 +52,6 @@ function sendJson(res, data) {
   res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   res.send(data)
-}
-
-function asHtml(data) {
-  return '<html><body><pre><code>' + JSON.stringify(data, null, 4) + '</code></pre></body></html>'
 }
 
 function setFanSpeed(fan) {
