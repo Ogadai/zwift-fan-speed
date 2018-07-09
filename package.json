@@ -4,7 +4,8 @@
   "description": "Control fan speed based on rider speed in Zwift",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "build": "copyfiles -f ./node_modules/zwift-fan-speed-ui/public/* ./public&&copyfiles -f ./node_modules/zwift-fan-speed-ui/public/img/* ./public/img"
   },
   "author": {
     "name": "alee"
@@ -16,6 +17,10 @@
     "https": "^1.0.0",
     "onoff": "^1.1.1",
     "protobufjs": "^6.5.1",
+    "zwift-fan-speed-ui": "file:../zwift-fan-speed-ui",
     "zwift-mobile-api": "*"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.0.0"
   }
 }

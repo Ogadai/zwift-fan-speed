@@ -8,6 +8,7 @@
 npm-debug.*
 /obj/
 /.vs/
+/public/
 zwift-fan-speed.njsproj
 zwift-fan-speed.sln
 settings.js

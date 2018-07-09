@@ -1,12 +1,11 @@
 ﻿const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const ZwiftAccount = require('zwift-mobile-api');
 const settings = require('./settings');
 const port = settings.port || 3000;
 
-const account = new ZwiftAccount(settings.username, settings.password);
 let fanSpeed = null;
+let fanApp = null;
 
 app.use(bodyParser.json());
 
@@ -30,12 +29,19 @@ app.post('/fan', function (req, res) {
   sendJson(res, result);
 });
 
-app.get('/profile', function (req, res) {
-  var playerId = req.query.player || settings.player;
-  account.getProfile(playerId).profile().then(respondJson(res));
+app.options('/status', function (req, res) {
+  sendJson(res);
+});
+app.get('/status', function (req, res) {
+  sendJson(res, fanApp.getStatus());
+})
+app.post('/status', function (req, res) {
+  const status = req.body;
+  fanApp.setStatus(status);
+  sendJson(res, fanApp.getStatus());
 })
 
-app.use(express.static('node_modules/zwift-fan-speed-ui/public'))
+app.use(express.static(`${__dirname}/public`))
 
 app.listen(port, function () {
   console.log(`Listening on port ${port}!`)
@@ -51,11 +57,12 @@ function sendJson(res, data) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.send(data)
+  res.status(200).send(data)
 }
 
-function setFanSpeed(fan) {
+function setFanSpeed(fan, app) {
   fanSpeed = fan;
+  fanApp = app;
 }
 
 module.exports = {

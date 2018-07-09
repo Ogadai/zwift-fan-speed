@@ -8,21 +8,30 @@ const account = new ZwiftAccount(settings.username, settings.password),
       led = new LED(settings.led);
 
 let interval,
-    playerProfile,
     fanSpeed = new FanSpeed(settings.fan),
-    errorCount
+    errorCount,
+    controlStatus = {
+        riding: false,
+        manual: false
+    }
 
-server.setFanSpeed(fanSpeed);
+server.setFanSpeed(fanSpeed, {
+    getStatus: () => Object.assign({ fan: fanSpeed.getState() }, controlStatus),
+    setStatus: status => {
+        controlStatus.manual = status && status.manual;
+    }
+});
 startWaitPlayer();
 
 function startWaitPlayer() {
+    controlStatus.riding = false;
     startInterval(checkPlayerStatus, settings.statusInterval || 10000);
 }
 
-function startMonitorSpeed(profile) {
+function startMonitorSpeed() {
     console.log('Start monitoring rider speed');
-    playerProfile = profile
     errorCount = 0;
+    controlStatus.riding = true;
 
     startInterval(checkPlayerSpeed, settings.interval || 2000);
 }
@@ -35,38 +44,38 @@ function startInterval(callbackFn, timeout) {
 
 function checkPlayerStatus() {
     led.setState('off');
-    account.getProfile(settings.player).profile()
-        .then(profile => {
-            led.setState('on');
-
-            if (profile.riding) {
-                console.log(`Player ${settings.player} has started riding`);
-                startMonitorSpeed(profile);
-            } else {
-                console.log(`Player ${settings.player} is not riding`);
-            }
+    account.getWorld(1).riderStatus(settings.player)
+        .then(() => {
+            console.log(`Player ${settings.player} has started riding`);
+            startMonitorSpeed();
         })
         .catch(err => {
-            led.setState('error');
-            console.log(`Error getting player status: ${err.response.status} - ${err.response.statusText}`);
+            if (err.response && err.response.status === 404) {
+                console.log(`Player ${settings.player} is not riding`);
+            } else {
+                led.setState('error');
+                console.log(`Error getting player status: ${err.response.status} - ${err.response.statusText}`);
+            }
         });
 }
 
 function checkPlayerSpeed() {
     led.setState('on');
-    account.getWorld(playerProfile.worldId).riderStatus(settings.player)
+    account.getWorld(1).riderStatus(settings.player)
         .then(status => {
             led.setState('off');
 
-            if (!status || status.speed === undefined) {
+            if (!status || status.speedInMillimetersPerHour === undefined) {
                 console.log('Invalid rider status');
                 speedCheckError();
             } else {
                 errorCount = 0;
-                const speedkm = Math.round((status.speed / 1000000));
-                console.log(`Distance: ${status.distance}, Time: ${status.time}, Speed: ${speedkm}km/h, Watts: ${status.power}w`);
+                const speedkm = Math.round((status.speedInMillimetersPerHour / 1000000));
+                console.log(`Distance: ${status.totalDistanceInMeters}, Time: ${status.rideDurationInSeconds}, Speed: ${speedkm}km/h, Watts: ${status.powerOutput}w`);
 
-                fanSpeed.setState(speedkm);
+                if (!controlStatus.manual) {
+                    fanSpeed.setState(speedkm);
+                }
             }
         })
         .catch(err => {
