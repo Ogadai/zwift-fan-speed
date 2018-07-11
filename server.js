@@ -23,7 +23,7 @@ app.post('/fan', function (req, res) {
   let speed = req.body.speed,
     result = {};
   if (fanSpeed) {
-    fanSpeed.setState(speed);
+    fanSpeed.setState(speed, "raw");
     result = fanSpeed.getState();
   }
   sendJson(res, result);

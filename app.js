@@ -12,13 +12,15 @@ let interval,
     errorCount,
     controlStatus = {
         riding: false,
-        manual: false
+        manual: false,
+        heartRate: false
     }
 
 server.setFanSpeed(fanSpeed, {
     getStatus: () => Object.assign({ fan: fanSpeed.getState() }, controlStatus),
     setStatus: status => {
-        controlStatus.manual = status && status.manual;
+        controlStatus.manual = status && (status.manual !== undefined) ? status.manual : controlStatus.manual;
+        controlStatus.heartRate = status && (status.heartRate !== undefined) ? status.heartRate : controlStatus.heartRate;
     }
 });
 startWaitPlayer();
@@ -71,10 +73,14 @@ function checkPlayerSpeed() {
             } else {
                 errorCount = 0;
                 const speedkm = Math.round((status.speedInMillimetersPerHour / 1000000));
-                console.log(`Distance: ${status.totalDistanceInMeters}, Time: ${status.rideDurationInSeconds}, Speed: ${speedkm}km/h, Watts: ${status.powerOutput}w`);
+                console.log(`Distance: ${status.totalDistanceInMeters}, Time: ${status.rideDurationInSeconds}, Speed: ${speedkm}km/h, Watts: ${status.powerOutput}w, HeartRate: ${status.heartRateInBpm}`);
 
                 if (!controlStatus.manual) {
-                    fanSpeed.setState(speedkm);
+                    if (controlStatus.heartRate) {
+                        fanSpeed.setState(status.heartRateInBpm, 'heartRate');
+                    } else {
+                        fanSpeed.setState(speedkm);
+                    }
                 }
             }
         })

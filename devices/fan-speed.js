@@ -10,8 +10,9 @@ class FanSpeed {
       min: 10,
       max: 50,
       scale: 1,
-		base: 0.2,
-      pollInterval: 100
+		  base: 0.2,
+      pollInterval: 100,
+      raw: { min: 0.2, max: 1 }
     }, config);
 
     if (Gpio) {
@@ -24,18 +25,22 @@ class FanSpeed {
     }
   }
 
-  getFanSpeed(speedKm) {
-    if (speedKm > this.settings.max) speedKm = this.settings.max;
-    if (speedKm < this.settings.min) speedKm = this.settings.min;
+  getFanSpeed(speed, speedType) {
+    const option = (speedType && this.settings[speedType]) ? this.settings[speedType] : this.settings;
+    if (speed > option.max) speed = option.max;
+    if (speed < option.min) speed = option.min;
 
-    let speed = Math.pow((speedKm - this.settings.min), this.settings.scale)
-      / Math.pow((this.settings.max - this.settings.min), this.settings.scale);
+    const scale = option.scale || this.settings.scale;
+    const base = option.base || this.settings.base;
 
-	    if (speed < this.settings.base) {
-		speed = speed < this.settings.base / 2 ? 0 : this.settings.base;
+    let scaledSpeed = Math.pow((speed - option.min), scale)
+      / Math.pow((option.max - option.min), scale);
+
+	    if (scaledSpeed < base) {
+		    scaledSpeed = scaledSpeed < base / 2 ? 0 : base;
 	    }
 
-    return Math.round(speed * 100) / 100;
+    return Math.round(scaledSpeed * 100) / 100;
   }
 
   onTimeout(outVal) {
@@ -63,9 +68,9 @@ class FanSpeed {
     }
   }
 
-  setState(speed) {
+  setState(speed, speedType) {
     this.speed = speed;
-    this.currentState = this.getFanSpeed(speed);
+    this.currentState = this.getFanSpeed(speed, speedType);
     if (!this.gpio) {
       console.log(`Fan speed ${this.currentState}`);
     }
