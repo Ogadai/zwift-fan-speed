@@ -9,6 +9,11 @@ let fanApp = null;
 
 app.use(bodyParser.json());
 
+// app.use((req, res, next) => {
+//   console.log(req.url);
+//   next();
+// })
+
 app.options('/fan', function (req, res) {
   sendJson(res);
 });

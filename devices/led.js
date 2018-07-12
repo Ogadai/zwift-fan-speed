@@ -19,7 +19,7 @@ class LED {
                 this.gpio.writeSync(state === 'on' ? 1 : 0);
             }
         } else {
-            console.log(`LED: ${state}`);
+//            console.log(`LED: ${state}`);
         }
     }
 

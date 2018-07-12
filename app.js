@@ -45,14 +45,16 @@ function startInterval(callbackFn, timeout) {
 }
 
 function checkPlayerStatus() {
-    led.setState('off');
+    led.setState('on');
     account.getWorld(1).riderStatus(settings.player)
         .then(() => {
+            led.setState('off');
             console.log(`Player ${settings.player} has started riding`);
             startMonitorSpeed();
         })
         .catch(err => {
             if (err.response && err.response.status === 404) {
+                led.setState('off');
                 console.log(`Player ${settings.player} is not riding`);
             } else {
                 led.setState('error');
